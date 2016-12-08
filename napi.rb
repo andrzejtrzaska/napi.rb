@@ -23,7 +23,7 @@ def f(md5sum)
     z = x.to_s(16)
     b += z
   end
-  b
+  b.downcase
 end
 
 ALLOWED_EXTENSIONS = %w(avi mp4 mkv mov webm flv rmvb mpg mpeg 3gp).freeze
