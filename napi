@@ -10,8 +10,8 @@ ARCHIVE_PASSWORD = 'iBlm8NTigvru0Jr0'.freeze
 ALLOWED_EXTENSIONS = %w(avi mp4 mkv mov webm flv rmvb mpg mpeg 3gp).freeze
 TEN_MEGABYTES = 10_485_760
 T_IDX = [0xe, 0x3, 0x6, 0x8, 0x2].freeze
-T_MUL = [2, 2, 5, 4, 3].freeze
-T_ADD = [0, 0xd, 0x10, 0xb, 0x5].freeze
+T_MUL = [0x2, 0x2, 0x5, 0x4, 0x3].freeze
+T_ADD = [0x0, 0xd, 0x10, 0xb, 0x5].freeze
 DEFAULT_ENCODING = 'windows-1250'.freeze
 
 def download_method_name
@@ -31,7 +31,7 @@ def f(md5sum)
 
   (0..4).each do |i|
     a = T_ADD[i]
-    m = T_IDX[i]
+    m = T_MUL[i]
     g = T_IDX[i]
     t = a + md5sum[g].to_i(16)
     v = md5sum[t..t + 1].to_i(16)
@@ -117,7 +117,7 @@ def find_subtitles(path)
   extension = File.extname(path).delete('.')
   unless ALLOWED_EXTENSIONS.include?(extension)
     puts "Format #{extension} is not supported"
-    return
+    return false
   end
 
   md5sum = md5(path)
@@ -126,21 +126,27 @@ def find_subtitles(path)
     dir = File.dirname(path)
     base = File.basename(path, '.*')
     send(save_method_name, dir, base, response)
-    puts "Subtitles found for #{path}"
+    puts "[OK] #{path}"
+    return true
   else
-    puts "No subtitles found for #{path}"
+    puts "[UNAV] #{path}"
+    return false
   end
 end
 
 def find_subtitles_folder(path)
   count = 0
+  threads = []
   entries = Dir["#{path}/**/*"]
   entries.each do |entry|
     extension = File.extname(entry).delete('.')
     next unless ALLOWED_EXTENSIONS.include?(extension)
-    find_subtitles(entry)
-    count += 1
+    threads << Thread.new do
+      result = find_subtitles(entry)
+      count += 1 if result
+    end
   end
+  threads.each { |thr| thr.join }
 
   puts "Found #{count} subtitles"
 end
