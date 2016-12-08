@@ -1,4 +1,4 @@
-# Ruby Napi
+# Napi
 
 Portable NapiProjekt client written in ruby.
 
