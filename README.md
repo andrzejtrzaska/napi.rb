@@ -41,6 +41,7 @@ In case conversion is not possible, subtitles will have original character encod
 
 ## History
 
+v0.2 - Fix small bug in api v1 f function, add multithreaded downloading of subtitles
 v0.1 - Implement NapiProjekt API v1 and v3
 
 ## Credits
