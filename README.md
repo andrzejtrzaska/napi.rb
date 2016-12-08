@@ -25,6 +25,12 @@ You can enable V3 support by setting NAPIPROJEKT_API_VERSION environment variabl
 
 Note: NapiProjekt API V3 requires 7z program to be installed on your system. It is needed to extract compressed subtitles.
 
+
+## Notes
+
+When using NapiProjekt API V1, by default ```windows-1250``` character encoding is assubmed. Subtitles are automatically converted to ```utf-8```.
+In case conversion is not possible, subtitles will have original character encoding.
+
 ## Contributing
 
 1. Fork it!
