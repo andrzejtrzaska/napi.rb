@@ -2,6 +2,11 @@
 
 Portable NapiProjekt client written in ruby.
 
+## Requirements
+
+Make sure to have ruby installed on your system.
+To use NapiProjekt API V3, 7z is required to be installed on your system.
+
 ## Installation
 
     wget https://raw.githubusercontent.com/andrzejtrzaska/napi.rb/master/napi
