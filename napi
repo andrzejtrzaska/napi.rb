@@ -3,9 +3,8 @@
 require 'digest'
 require 'net/http'
 require 'base64'
-require 'fileutils'
 
-API_VERSION = ENV.fetch('NAPIPROJEKT_API_VERSION', 1)
+API_VERSION = ENV.fetch('NAPIPROJEKT_API_VERSION', 3)
 ARCHIVE_PASSWORD = 'iBlm8NTigvru0Jr0'.freeze
 ALLOWED_EXTENSIONS = %w(avi mp4 mkv mov webm flv rmvb mpg mpeg 3gp).freeze
 TEN_MEGABYTES = 10_485_760
@@ -13,6 +12,29 @@ T_IDX = [0xe, 0x3, 0x6, 0x8, 0x2].freeze
 T_MUL = [0x2, 0x2, 0x5, 0x4, 0x3].freeze
 T_ADD = [0x0, 0xd, 0x10, 0xb, 0x5].freeze
 DEFAULT_ENCODING = 'windows-1250'.freeze
+CLIENTS = [
+  NAPIPROJEKT_PYTHON = 'NapiProjektPython'.freeze,
+  NAPIPROJEKT = 'Napiprojekt'.freeze,
+  AUTOMOVE = 'AutoMove'.freeze
+].freeze
+DOWNLOADED_SUBTITLES_TXT_MODES = [
+  DOWNLOADED_SUBTITLES_TXT_MODE_1 = 1,
+  DOWNLOADED_SUBTITLES_TXT_MODE_2 = 2
+].freeze
+DOWNLOADED_SUBTITLES_LANGUAGES = [
+  POLISH = 'PL'.freeze,
+  ENGLISH = 'ENG'.freeze
+].freeze
+API_MODES = [
+  API_MODE_1 = 1,
+  API_MODE_31 = 31,
+  API_MODE_32 = 32
+].freeze
+CLIENT_VERSIONS = [
+  '2.2.0.2399',
+  '1.0'
+].freeze
+LANGUAGE = ENV.fetch('NAPIPROJEKT_LANGUAGE', POLISH)
 
 def download_method_name
   "download_v#{API_VERSION}"
@@ -50,7 +72,7 @@ end
 def get_response_v1(md5sum)
   f_param = md5sum
   t_param = f(md5sum)
-  url = "http://napiprojekt.pl/unit_napisy/dl.php?l=PL&f=#{f_param}"\
+  url = "http://napiprojekt.pl/unit_napisy/dl.php?l=#{LANGUAGE}&f=#{f_param}"\
     "&t=#{t_param}&v=pynapi&kolejka=false&nick=&pass=&napios=posix"
   Net::HTTP.get(URI(url))
 end
@@ -61,12 +83,6 @@ def process_response_v1(response_body)
 rescue Encoding::UndefinedConversionError
   response_body.dup
 end
-
-def save_v1(dir, base, response)
-  sub_path = "#{dir}/#{base}.txt"
-  File.write(sub_path, response)
-end
-
 def download_v3(md5sum)
   response = get_response_v3(md5sum)
   process_response_v3(response)
@@ -74,19 +90,21 @@ end
 
 def get_response_v3(md5sum)
   form = {
-    mode: 31,
-    client: 'NapiProjektPython',
-    client_ver: '2.2.0.2399',
-    user_nick: '',
-    user_password: '',
+    mode: API_MODE_1,
+    client: NAPIPROJEKT,
+    client_ver: CLIENT_VERSIONS.first,
     downloaded_subtitles_id: md5sum,
-    downloaded_subtitles_lang: 'PL',
-    downloaded_cover_id: md5sum,
-    advert_type: 'flashAllowed',
-    video_info_hash: md5sum,
-    nazwa_pliku: 'example.mp4',
-    rozmiar_pliku_bajty: 1024,
-    the: 'end'
+    downloaded_subtitles_txt: DOWNLOADED_SUBTITLES_TXT_MODE_1,
+    downloaded_subtitles_lang: LANGUAGE,
+    # user_nick: '',
+    # user_password: '',
+    # downloaded_cover_id: md5sum,
+    # downloaded_subtitles_txt: 2,
+    # advert_type: 'flashAllowed',
+    # video_info_hash: md5sum,
+    # nazwa_pliku: 'example.mp4',
+    # rozmiar_pliku_bajty: 1024,
+    # the: 'end'
   }
   url = 'http://napiprojekt.pl/api/api-napiprojekt3.php'
   Net::HTTP.post_form(URI(url), form).body
@@ -100,17 +118,9 @@ def process_response_v3(response_body)
   Base64.decode64(encoded_subs)
 end
 
-def save_v3(dir, base, response)
-  zip_path = "#{dir}/#{base}.7z"
+def save(dir, base, response)
   sub_path = "#{dir}/#{base}.txt"
-  File.write(zip_path, response)
-  extract_7z(zip_path, sub_path)
-  FileUtils.rm(zip_path)
-end
-
-def extract_7z(zip_path, sub_path)
-  cmd = "7z x -y -so -p\"#{ARCHIVE_PASSWORD}\" \"#{zip_path}\" 2> /dev/null > \"#{sub_path}\""
-  system cmd
+  File.write(sub_path, response)
 end
 
 def find_subtitles(path)
@@ -125,7 +135,7 @@ def find_subtitles(path)
   if response
     dir = File.dirname(path)
     base = File.basename(path, '.*')
-    send(save_method_name, dir, base, response)
+    save(dir, base, response)
     puts "[OK] #{path}"
     return true
   else
@@ -146,7 +156,7 @@ def find_subtitles_folder(path)
       count += 1 if result
     end
   end
-  threads.each { |thr| thr.join }
+  threads.each(&:join)
 
   puts "Found #{count} subtitles"
 end

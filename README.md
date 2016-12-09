@@ -4,8 +4,7 @@ Portable NapiProjekt client written in ruby.
 
 ## Requirements
 
-Make sure to have ruby installed on your system.
-To use NapiProjekt API V3, 7z is required to be installed on your system.
+Make sure to have ruby installed on your system. That's it.
 
 ## Installation
 
@@ -18,17 +17,20 @@ The usage is very simple. Just pass a directory or a movie path as a argument to
 
     ./napi ~/Videos
 
-By default API V1 is used.
-You can enable V3 support by setting NAPIPROJEKT_API_VERSION environment variable, like so:
+By default, API V3 is used.
+You can enable legacy V1 support by setting NAPIPROJEKT_API_VERSION environment variable, like so:
 
-    NAPIPROJEKT_API_VERSION=3 ./napi ~/Videos
+    NAPIPROJEKT_API_VERSION=1 ./napi ~/Videos
 
-Note: NapiProjekt API V3 requires 7z program to be installed on your system. It is needed to extract compressed subtitles.
+You can change subtitles language using NAPIPROJEKT_LANGUAGE environment variable:
 
+    NAPIPROJEKT_LANGUAGE=ENG ./napi ~/Videos
+
+By default, polish is used.
 
 ## Notes
 
-When using NapiProjekt API V1, by default ```windows-1250``` character encoding is assubmed. Subtitles are automatically converted to ```utf-8```.
+When using NapiProjekt API V1, by default ```windows-1250``` character encoding is assumed. Subtitles are automatically converted to ```utf-8```.
 In case conversion is not possible, subtitles will have original character encoding.
 
 ## Contributing
@@ -41,6 +43,7 @@ In case conversion is not possible, subtitles will have original character encod
 
 ## History
 
+v0.3 - Change default api to v3, get rid of 7z dependency, add language environment variable for manipulating language of subtitles
 v0.2 - Fix small bug in api v1 f function, add multithreaded downloading of subtitles
 v0.1 - Implement NapiProjekt API v1 and v3
 
