@@ -18,6 +18,7 @@ The usage is very simple. Just pass a directory or a movie path as a argument to
     ./napi ~/Videos
 
 By default, API V3 is used.
+
 You can enable legacy V1 support by setting NAPIPROJEKT_API_VERSION environment variable, like so:
 
     NAPIPROJEKT_API_VERSION=1 ./napi ~/Videos
@@ -44,7 +45,9 @@ In case conversion is not possible, subtitles will have original character encod
 ## History
 
 v0.3 - Change default api to v3, get rid of 7z dependency, add language environment variable for manipulating language of subtitles
+
 v0.2 - Fix small bug in api v1 f function, add multithreaded downloading of subtitles
+
 v0.1 - Implement NapiProjekt API v1 and v3
 
 ## Credits
