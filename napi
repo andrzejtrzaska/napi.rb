@@ -45,7 +45,7 @@ def save_method_name
 end
 
 def md5(path)
-  Digest::MD5.hexdigest(File.open(path).read(TEN_MEGABYTES))
+  Digest::MD5.hexdigest(File.read(path, TEN_MEGABYTES))
 end
 
 def f(md5sum)
@@ -83,6 +83,7 @@ def process_response_v1(response_body)
 rescue Encoding::UndefinedConversionError
   response_body.dup
 end
+
 def download_v3(md5sum)
   response = get_response_v3(md5sum)
   process_response_v3(response)
