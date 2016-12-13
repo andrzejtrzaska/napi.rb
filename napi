@@ -146,20 +146,16 @@ def find_subtitles(path)
 end
 
 def find_subtitles_folder(path)
-  count = 0
-  threads = []
   entries = Dir["#{path}/**/*"]
   entries.each do |entry|
     extension = File.extname(entry).delete('.')
     next unless ALLOWED_EXTENSIONS.include?(extension)
-    threads << Thread.new do
-      result = find_subtitles(entry)
-      count += 1 if result
+    Process.fork do
+      find_subtitles(entry)
+      exit
     end
   end
-  threads.each(&:join)
-
-  puts "Found #{count} subtitles"
+  Process.waitall
 end
 
 path = ARGV[0]
